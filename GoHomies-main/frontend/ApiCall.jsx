@@ -6,13 +6,16 @@ const api = axios.create({
 
 export const UserSignIn = async(email,password)=>{
     try {
+        console.log('Attempting login with email:', email);
         const response = await api.post('user/login',{email:email,password:password},{
             withCredentials: true,
-          })
+        })
+        console.log('Login response received:', response);
         return response
 
     } catch (error) {
-        
+        console.error('Login request error:', error);
+        console.error('Error response data:', error?.response?.data);
         return error.response
     }
 }
@@ -48,19 +51,26 @@ export const CompleteUserProfile = async(userEmail,title,designation,about) =>{
     }
 }
 
-export const CreatePost = async(destination,totalPersons,TravelMonth,BudgetPerPerson,description) => {
+export const CreatePost = async(destination,totalPersons,TravelMonth,BudgetPerPerson,description,imageFile) => {
     try {
-        const response = await api.post('post/create',{
-            destination:destination,
-            totalPersons:totalPersons,
-            TravelMonth:TravelMonth,
-            BudgetPerPerson:BudgetPerPerson,
-            description:description
+        const formData = new FormData();
+        formData.append('destination', destination);
+        formData.append('totalPersons', totalPersons);
+        formData.append('TravelMonth', TravelMonth);
+        formData.append('BudgetPerPerson', BudgetPerPerson);
+        formData.append('description', description);
+        
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
 
-        },{ withCredentials: true })
+        const response = await api.post('post/create', formData, {
+            withCredentials: true
+        })
 
         return response
     } catch (error) {
+        console.error('CreatePost Error:', error);
         return error.response
     }
 }

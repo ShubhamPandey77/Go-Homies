@@ -34,6 +34,13 @@ const PostFeedCenter = ({ className }) => {
     };
 
     fetchData();
+
+    const handlePostCreated = () => {
+      fetchData();
+    };
+
+    window.addEventListener("postCreated", handlePostCreated);
+    return () => window.removeEventListener("postCreated", handlePostCreated);
   }, [dispatch]);
 
   // ❗ User not logged in
@@ -114,6 +121,7 @@ const PostFeedCenter = ({ className }) => {
                 initialOptCount={interestedPersons.length}
                 likedPerson={post.likedBy}
                 likeCount={post.likeCount}
+                image={post.image}
               />
             );
           })

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Images
 import Image1 from "../../../assets/1.jpg";
@@ -8,6 +9,7 @@ import Image4 from "../../../assets/4.jpg";
 import Image5 from "../../../assets/5.jpg";
 
 const PostFeedRight = () => {
+  const navigate = useNavigate();
   const preloadImages = (images) => {
     const promises = images.map((src) => {
       return new Promise((resolve, reject) => {
@@ -36,23 +38,28 @@ const PostFeedRight = () => {
   return (
     <div className="flex-[0.70] h-full w-full flex flex-col justify-between gap-2 pb-4">
 
-      <div className="h-full w-full border border-[#d7d7d8] rounded-3xl overflow-hidden poppins bg-[linear-gradient(0deg,hsla(234,80%,88%,1)_0%,hsla(340,68%,88%,1)_50%,hsla(342,72%,85%,1)_100%)] flex flex-col items-start justify-end gap-2 p-4">
+      <div className="h-full w-full border border-[#d7d7d8] rounded-3xl overflow-hidden poppins bg-[linear-gradient(0deg,hsla(234,80%,88%,1)_0%,hsla(340,68%,88%,1)_50%,hsla(342,72%,85%,1)_100%)] flex flex-col items-start justify-end gap-4 p-6">
 
-        <h1 className="font-semibold text-[2rem] leading-tight">
+        <h1 className="font-semibold text-[2rem] leading-tight text-gray-900">
           Start <br /> Customizing
         </h1>
 
-        <button className="px-4 py-2 border rounded-xl text-[0.875rem] w-full flex items-center justify-between">
-          Getting Started
+        <p className="text-gray-700 text-sm">Create your travel post and find the perfect travel buddies for your next adventure.</p>
+
+        <button 
+          onClick={() => navigate('/posts')}
+          className="px-6 py-3 bg-[#6B8E23] hover:bg-[#5a7a1c] text-white rounded-lg text-[0.875rem] w-full flex items-center justify-between transition duration-300 font-medium"
+        >
+          Create a Post
 
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="lucide lucide-arrow-right"

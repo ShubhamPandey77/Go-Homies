@@ -4,8 +4,6 @@ import { useScreenResizeValue } from "../../ScreenSizeFunction";
 import Image1 from "../../assets/1.jpg";
 import Image2 from "../../assets/2.jpg";
 import Image3 from "../../assets/3.jpg";
-import Image4 from "../../assets/4.jpg";
-import Image5 from "../../assets/5.jpg";
 
 const TopPackages = () => {
   const breakpoint = useScreenResizeValue();
@@ -26,7 +24,7 @@ const TopPackages = () => {
   };
 
   useEffect(() => {
-    const imgs = [Image1, Image2, Image3, Image4, Image5];
+    const imgs = [Image1, Image2, Image3];
     preloadImages(imgs)
       .then(() => setImagesLoaded(true))
       .catch((err) => console.error("Image failed to load", err));
@@ -51,24 +49,12 @@ const TopPackages = () => {
       Desgn: "4D/3N • ₹20,000",
       location: "Himachal",
     },
-    {
-      image: Image4,
-      name: "City Explorer",
-      Desgn: "3D/2N • ₹18,000",
-      location: "Delhi",
-    },
-    {
-      image: Image5,
-      name: "Spiritual Journey",
-      Desgn: "6D/5N • ₹28,000",
-      location: "Rishikesh",
-    },
   ];
 
   if (!imagesLoaded) return null;
 
   return (
-    <div className="flex items-center justify-center overflow-hidden w-full py-[2rem] px-4">
+    <div className="flex items-center justify-center overflow-hidden w-full py-[3rem] px-4 bg-gradient-to-b from-white to-[#f5f5f5]">
       <div
         className={`${
           breakpoint <= 1440 ? "w-[96%]" : "w-[1392px]"
@@ -76,38 +62,40 @@ const TopPackages = () => {
       >
         {/* ------------ TEXT SECTION ------------ */}
         <div className="flex flex-col items-center justify-center">
-          <span className="px-[2rem] py-[.25rem] rounded-full bg-[#6B8E23] text-white text-sm md:text-base">
-            Browse over 1000 Packages
+          <span className="px-[2rem] py-[.5rem] rounded-full bg-[#6B8E23] text-white text-xs md:text-sm font-medium">
+            ✨ Popular Destinations
           </span>
 
-          <h1 className="text-[2rem] md:text-[3rem] text-center capitalize font-semibold mt-4">
-            Discover what top <br className="hidden md:block" /> platforms have to offer you
+          <h1 className="text-[2.2rem] md:text-[3.5rem] text-center capitalize font-bold mt-6 leading-tight">
+            Explore Trending <br className="hidden md:block" /> Travel Packages
           </h1>
 
-          <p className="text-[0.9rem] md:text-[1rem] text-center w-full md:w-[70%] mt-4">
-            Get the top trending packages from top travel companies to your
-            favourite destination
+          <p className="text-[0.9rem] md:text-[1.05rem] text-center w-full md:w-[75%] mt-5 text-gray-600 leading-relaxed">
+            Discover curated travel experiences designed for adventurers. From serene backwaters to majestic mountains, find your perfect destination with our handpicked packages.
           </p>
         </div>
 
         {/* ------------ PACKAGES LIST ------------ */}
         <div className="w-full overflow-x-auto md:overflow-visible">
-          <ul className="flex items-center justify-center gap-[1rem] h-[250px] md:h-[400px] select-none min-w-max md:min-w-0">
+          <ul className="flex items-center justify-center gap-[1.2rem] h-[280px] md:h-[420px] select-none min-w-max md:min-w-0">
             {TopPackagesArray.map((packages, index) => (
               <li
                 key={index}
                 className="
-                  w-[80px] 
+                  w-[90px] 
                   group 
-                  hover:w-[260px] 
+                  hover:w-[300px] 
                   bg-[rgba(0,0,0,0.5)] 
                   h-full 
                   relative 
-                  rounded-[50px] 
+                  rounded-[40px] 
                   overflow-hidden 
                   transition-all 
                   duration-500 
                   ease-in-out
+                  cursor-pointer
+                  shadow-lg
+                  hover:shadow-2xl
                 "
               >
                 {/* Dark overlay */}
@@ -115,7 +103,7 @@ const TopPackages = () => {
                   className="
                     absolute inset-0 
                     bg-[rgba(0,0,0,0.55)] 
-                    group-hover:bg-[rgba(0,0,0,0.15)]
+                    group-hover:bg-[rgba(0,0,0,0.2)]
                     z-10 
                     transition-all 
                     duration-500
@@ -147,7 +135,7 @@ const TopPackages = () => {
                     text-white
                   "
                 >
-                  <h2 className="text-[1rem] whitespace-nowrap">
+                  <h2 className="text-[1rem] whitespace-nowrap font-semibold">
                     {packages.name}
                   </h2>
                 </span>
@@ -159,20 +147,20 @@ const TopPackages = () => {
                     z-20 
                     top-[70%]
                     left-[-150%]
-                    group-hover:left-[20%]
+                    group-hover:left-[15%]
                     transition-all 
                     duration-500
                     text-white
                   "
                 >
-                  <h2 className="whitespace-nowrap text-[1.3rem] font-semibold">
+                  <h2 className="whitespace-nowrap text-[1.4rem] font-bold leading-tight">
                     {packages.name}
                   </h2>
-                  <p className="whitespace-nowrap text-[0.9rem]">
+                  <p className="whitespace-nowrap text-[0.95rem] mt-2 font-medium">
                     {packages.Desgn}
                   </p>
-                  <p className="whitespace-nowrap text-[0.8rem] mt-1 opacity-90">
-                    {packages.location}
+                  <p className="whitespace-nowrap text-[0.85rem] mt-2 opacity-95 flex items-center gap-1">
+                    📍 {packages.location}
                   </p>
                 </span>
               </li>

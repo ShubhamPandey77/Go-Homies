@@ -19,6 +19,7 @@ const PostCard = (props) => {
     time,
     initialOptedIn,
     initialOptCount,
+    image,
   } = props;
 
   const [optedIn, setOptedIn] = useState(props.initialOptedIn);
@@ -255,6 +256,16 @@ const handleLikeToggle = async () => {
                 {props.desc}
               </p>
             )}
+          </div>
+        )}
+
+        {image && (
+          <div className="relative w-full mt-3">
+            <img
+              src={image}
+              alt="Post image"
+              className="w-full h-auto max-h-96 object-cover rounded-xl"
+            />
           </div>
         )}
 

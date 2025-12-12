@@ -17,6 +17,8 @@ const PostCreationSection = () => {
   const [TravelMonth, setTravelMonth] = useState("");
   const [BudgetPerPerson, setBudgetPerPerson] = useState("");
   const [description, setDescription] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   // Validations
   const [isFormValid, setIsFormValid] = useState(false);
@@ -54,70 +56,111 @@ const PostCreationSection = () => {
     else if (name === "description") setDescription(value);
   };
 
+  // Image handler
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove image
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
   // Submit Handler
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
     try {
+      setIsSubmitting(true);
+      setErrorMessage("");
+
       const response = await CreatePost(
         destination,
         totalPersons,
         TravelMonth,
         BudgetPerPerson,
-        description
+        description,
+        imageFile
       );
 
-      if (response.data.msg === "Post Created Successfully") {
-        window.dispatchEvent(new Event("postCreated"));
+      if (response?.data?.msg === "Post Created Successfully" || response?.status === 201) {
         setOpenAlert(true);
-
+        
         const fetchData = async () => {
-          const res = await FetchPost();
-          if (res.status === 200) {
-            dispatch(setAllPosts(res.data));
+          try {
+            const res = await FetchPost();
+            if (res?.status === 200) {
+              dispatch(setAllPosts(res.data));
+            }
+          } catch (fetchError) {
+            console.error("Error fetching posts:", fetchError);
           }
         };
+        
         fetchData();
-      }
+        window.dispatchEvent(new Event("postCreated"));
 
-      // Clear form
-      setDestination("");
-      setTotalPersons("");
-      setTravelMonth("");
-      setBudgetPerPerson("");
-      setDescription("");
+        // Clear form
+        setDestination("");
+        setTotalPersons("");
+        setTravelMonth("");
+        setBudgetPerPerson("");
+        setDescription("");
+        setImageFile(null);
+        setImagePreview(null);
+      } else {
+        console.error("Response error:", response);
+        setErrorMessage(response?.data?.msg || response?.data?.error || "Failed to create post. Please try again.");
+      }
     } catch (error) {
       console.error("Error creating post:", error);
+      console.error("Error details:", error?.response?.data);
+      setErrorMessage(error?.response?.data?.msg || error?.response?.data?.error || error?.message || "Network error. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center overflow-hidden w-full min-h-[100vh] py-8">
+    <div className="flex items-center justify-center overflow-hidden w-full min-h-[100vh] py-12 px-4 bg-gradient-to-br from-[#ffffff] via-[#fafafa] to-[#f5f5f5]">
       <div
         className={`${
           breakpoint <= 1440 ? "w-[84%]" : "w-[1200px]"
-        } flex flex-col lg:flex-row items-center justify-center gap-[2rem] py-[1rem]`}
+        } flex flex-col lg:flex-row items-center justify-center gap-[3rem] py-[2rem]`}
       >
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-[1rem] w-full">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-[2rem] w-full">
           {/* Left text section */}
-          <div className="flex-[1.5] text-black flex flex-col items-center lg:items-start gap-[1rem] p-[20px] lg:p-[40px] lg:pl-0">
-            <span className="px-[2rem] py-[.25rem] rounded-full bg-[#6B8E23] text-white text-sm">
-              Find Your Homie
+          <div className="flex-[1.5] text-black flex flex-col items-center lg:items-start gap-[1.5rem] p-[20px] lg:p-[40px] lg:pl-0">
+            <span className="px-[2rem] py-[.5rem] rounded-full bg-[#6B8E23] text-white text-xs md:text-sm font-medium">
+              🌍 Find Your Perfect Travel Buddy
             </span>
 
-            <h1 className="main-title text-[2rem] md:text-[3rem] text-black capitalize font-semibold text-center lg:text-left">
+            <h1 className="main-title text-[2.3rem] md:text-[3.3rem] text-black capitalize font-bold text-center lg:text-left leading-tight">
               Unleash the traveler{" "}
               <span className="text-[#6B8E23]">inside you</span>, Enjoy your
               Dream Vacation
             </h1>
 
-            <p className="text-black text-center lg:text-left text-sm md:text-base">
-              Create a post and tell your mates where you're going and see who
-              joins you.
+            <p className="text-gray-700 text-center lg:text-left text-sm md:text-base leading-relaxed">
+              Create a post and tell your travel buddies where you're headed. Connect with like-minded explorers and plan your perfect group adventure together.
             </p>
           </div>
 
           {/* Right form section */}
-          <div className="right-section p-[1.2rem] md:p-[1.7rem] flex-[.75] w-full lg:w-auto flex flex-col items-start gap-[1rem] rounded-[1rem] bg-white/30 backdrop-sepia-0">
-            <h1 className="form-title text-black">Create New Post</h1>
+          <div className="right-section p-[1.5rem] md:p-[2rem] flex-[.75] w-full lg:w-auto flex flex-col items-start gap-[1.5rem] rounded-[2rem] bg-white shadow-2xl border border-gray-100">
+            <h1 className="form-title text-2xl font-bold text-gray-900">Create Travel Post</h1>
 
             <form className="form w-full">
               <div className="input-group">
@@ -187,19 +230,55 @@ const PostCreationSection = () => {
                   />
                 </div>
               </div>
+
+              <div className="input-group">
+                <label>Add Photos (Optional)</label>
+                <div className="flex flex-col gap-3">
+                  <label className="flex items-center justify-center w-full p-4 border-2 border-dashed border-[#6B8E23] rounded-xl cursor-pointer hover:bg-gray-50 transition">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    <div className="flex flex-col items-center gap-2">
+                      <svg className="w-8 h-8 text-[#6B8E23]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span className="text-sm text-gray-600">
+                        {imageFile ? imageFile.name : "Click to upload image from gallery"}
+                      </span>
+                    </div>
+                  </label>
+
+                  {imagePreview && (
+                    <div className="relative">
+                      <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full transition"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </form>
 
             <button
               onClick={handleSubmit}
-              className="submit-button w-full"
-              disabled={!isFormValid}
+              className="submit-button w-full py-3 rounded-lg font-semibold text-white transition duration-300 transform hover:scale-105 disabled:hover:scale-100"
+              disabled={!isFormValid || isSubmitting}
               style={{
-                backgroundColor: isFormValid ? "#6B8E23" : "#ccc",
-                cursor: isFormValid ? "pointer" : "not-allowed",
-                color: "white",
+                backgroundColor: (isFormValid && !isSubmitting) ? "#6B8E23" : "#ccc",
+                cursor: (isFormValid && !isSubmitting) ? "pointer" : "not-allowed",
               }}
             >
-              Create Post
+              {isSubmitting ? "Creating Post..." : "Create Post"}
             </button>
           </div>
         </div>
@@ -214,6 +293,18 @@ const PostCreationSection = () => {
       >
         <Alert severity="success" variant="filled">
           Post Created Successfully!
+        </Alert>
+      </Snackbar>
+
+      {/* Error Alert */}
+      <Snackbar
+        open={!!errorMessage}
+        autoHideDuration={4000}
+        onClose={() => setErrorMessage("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" variant="filled">
+          {errorMessage}
         </Alert>
       </Snackbar>
     </div>

@@ -105,9 +105,10 @@ export default function SignIn(props) {
 
     try {
       const response = await UserSignIn(email, password)
+      console.log('Login response:', response);
 
       if (response && response.data) {
-        if (response.data.msg === 'Logged In') {
+        if (response.data.msg === 'Logged In' && response.status === 200) {
           const user = response.data.user
           dispatch(setUserData({
             name: user?.name,
@@ -125,17 +126,22 @@ export default function SignIn(props) {
         }
         else {
           setPasswordError(true);
-          setPasswordErrorMessage(response.data.msg)
-          setAlertMessage(response.data.msg || 'Login failed. Please check your credentials.')
+          setPasswordErrorMessage(response.data.msg || 'Invalid credentials')
+          setAlertMessage(response.data.msg || 'Invalid email or password.')
           setAlertSeverity('error')
           setShowAlert(true)
         }
+      } else {
+        setAlertMessage('No response from server. Please try again.')
+        setAlertSeverity('error')
+        setShowAlert(true)
       }
     } catch (error) {
-      setAlertMessage('Network error. Please try again.')
+      console.error('Sign in error:', error);
+      console.error('Error response:', error?.response?.data);
+      setAlertMessage(error?.response?.data?.msg || 'Network error. Please try again.')
       setAlertSeverity('error')
       setShowAlert(true)
-      console.error('Sign in error:', error)
     }
 
     setSigningIn(false)

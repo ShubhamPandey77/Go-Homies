@@ -7,7 +7,7 @@ import "./AboutUsHeader.css";
 
 const AboutUsHeader = () => {
   return (
-    <div className="relative bg-[#FCDB67] pb-32 pt-20 overflow-hidden mt-[70px]">
+    <div className="relative bg-[#FCDB67] pb-32 pt-[100px] overflow-hidden">
       {/* Top section */}
       <div className="flex flex-col items-center justify-center px-4 space-y-6">
         <h1 className="text-5xl md:text-6xl font-bold text-center font-[poppins] text-[#1F1F1F]">

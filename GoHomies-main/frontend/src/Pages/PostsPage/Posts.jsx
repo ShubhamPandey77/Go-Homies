@@ -72,6 +72,7 @@ const Posts = () => {
               ) || false}
               initialOptCount={post.interested_persons?.length || 0}
               likeCount={post.likeCount || 0}
+              image={post.image}
             />
           ))}
         </div>

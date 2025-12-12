@@ -48,9 +48,7 @@ const PostFeedSection = () => {
             ref={containerRef}
             className="sticky top-[40px] md:top-[80px] h-auto md:h-[calc(100vh-82px)] flex flex-col md:flex-row items-start justify-between w-full gap-4"
           >
-            <div className="hidden lg:flex w-full lg:w-auto">
-              <PostFeedLeft />
-            </div>
+            
 
             <PostFeedCenter
               className={`${isStuck ? "overflow-hidden" : "overflow-auto"} z-20 w-full lg:flex-1`}
