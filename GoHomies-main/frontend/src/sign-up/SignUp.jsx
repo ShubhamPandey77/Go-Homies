@@ -71,6 +71,12 @@ export default function SignUp(props) {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+  const [designationError, setDesignationError] = React.useState(false);
+  const [designationErrorMessage, setDesignationErrorMessage] = React.useState('');
+  const [aboutError, setAboutError] = React.useState(false);
+  const [aboutErrorMessage, setAboutErrorMessage] = React.useState('');
+  const [titleError, setTitleError] = React.useState(false);
+  const [titleErrorMessage, setTitleErrorMessage] = React.useState('');
   const [profileCompleteForm, setProfileCompleteForm] = React.useState(false);
   const [UserEmail, setUserEmail] = React.useState('');
   const [signingUp, setSigningUp] = React.useState(false)
@@ -125,7 +131,7 @@ export default function SignUp(props) {
 
   const handleSubmit = async(event) => {
     event.preventDefault();
-    if (nameError || emailError || passwordError) {
+    if (!validateInputs()) {
       return;
     }
     const data = new FormData(event.currentTarget);
@@ -142,18 +148,30 @@ export default function SignUp(props) {
     try {
       const response = await UserSignUp(name, email, username, password);
 
-      if (response.data.msg === 'User Already exists') {
-        setPasswordError(true);
-        setPasswordErrorMessage('User Already exists');
+      if (response.data.msg === 'User already exists with this email') {
+        setEmailError(true);
+        setEmailErrorMessage('This email is already registered');
         setAlertMessage('This email is already registered. Please sign in instead.')
         setAlertSeverity('error')
         setShowAlert(true)
       }
-      else {
+      else if (response.data.msg === 'Username already taken') {
+        setNameError(true);
+        setNameErrorMessage('This username is already taken');
+        setAlertMessage('This username is already taken. Please choose another.')
+        setAlertSeverity('error')
+        setShowAlert(true)
+      }
+      else if (response.data.msg === 'User created successfully') {
         setAlertMessage('Account created! Please complete your profile.')
         setAlertSeverity('success')
         setShowAlert(true)
         setProfileCompleteForm(true)
+      }
+      else {
+        setAlertMessage('Error during signup. Please try again.')
+        setAlertSeverity('error')
+        setShowAlert(true)
       }
     } catch (error) {
       setAlertMessage('Network error. Please try again.')
@@ -172,42 +190,39 @@ export default function SignUp(props) {
 
     let isValid = true;
 
-    
     if (!designation.value) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter your workplace');
+      setDesignationError(true);
+      setDesignationErrorMessage('Please enter your workplace');
       isValid = false;
     } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
+      setDesignationError(false);
+      setDesignationErrorMessage('');
     }
 
     if (!about.value) {
-      setPasswordError(true);
-      setPasswordErrorMessage('Write something about you');
+      setAboutError(true);
+      setAboutErrorMessage('Write something about you');
       isValid = false;
     } else {
-      setPasswordError(false);
-      setPasswordErrorMessage('');
+      setAboutError(false);
+      setAboutErrorMessage('');
     }
 
     if (!title.value || title.value.length < 1) {
-      setNameError(true);
-      setNameErrorMessage('A cool title is required');
+      setTitleError(true);
+      setTitleErrorMessage('A cool title is required');
       isValid = false;
     } else {
-      setNameError(false);
-      setNameErrorMessage('');
+      setTitleError(false);
+      setTitleErrorMessage('');
     }
 
     return isValid;
-  
-
   }
 
   const handleSubmit2 = async(event) => {
     event.preventDefault();
-    if (nameError || emailError || passwordError) {
+    if (!validateInputs2()) {
       return;
     }
     const data = new FormData(event.currentTarget);
@@ -220,17 +235,16 @@ export default function SignUp(props) {
     try {
       const response = await CompleteUserProfile(UserEmail, title, designation, about);
 
-      if (response.data.msg === 'Error updating user') {
-        setAlertMessage('Error updating profile. Please try again.')
-        setAlertSeverity('error')
-        setShowAlert(true)
-      }
-
       if (response.data.msg === 'User Updated Successfully') {
         setAlertMessage('Profile completed successfully! Redirecting to sign in...')
         setAlertSeverity('success')
         setShowAlert(true)
         setTimeout(() => navigate('/signin'), 1500)
+      }
+      else {
+        setAlertMessage(response.data.msg || 'Error updating profile. Please try again.')
+        setAlertSeverity('error')
+        setShowAlert(true)
       }
     } catch (error) {
       setAlertMessage('Network error. Please try again.')
@@ -291,7 +305,7 @@ export default function SignUp(props) {
                 variant="outlined"
                 error={emailError}
                 helperText={emailErrorMessage}
-                color={passwordError ? 'error' : 'primary'}
+                color={emailError ? 'error' : 'primary'}
               />
             </FormControl>
             <FormControl>
@@ -315,7 +329,6 @@ export default function SignUp(props) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
               disabled={signingUp}
               sx={{
                 backgroundColor: '#6B8E23',
@@ -392,13 +405,13 @@ export default function SignUp(props) {
                 fullWidth
                 id="title"
                 placeholder="The Solo Traveller"
-                error={nameError}
-                helperText={nameErrorMessage}
-                color={nameError ? 'error' : 'primary'}
+                error={titleError}
+                helperText={titleErrorMessage}
+                color={titleError ? 'error' : 'primary'}
               />
             </FormControl>
             <FormControl>
-              <FormLabel htmlFor="email">Designation</FormLabel>
+              <FormLabel htmlFor="designation">Designation</FormLabel>
               <TextField
                 required
                 fullWidth
@@ -407,13 +420,13 @@ export default function SignUp(props) {
                 name="designation"
                 autoComplete="designation"
                 variant="outlined"
-                error={emailError}
-                helperText={emailErrorMessage}
-                color={passwordError ? 'error' : 'primary'}
+                error={designationError}
+                helperText={designationErrorMessage}
+                color={designationError ? 'error' : 'primary'}
               />
             </FormControl>
             <FormControl>
-              <FormLabel htmlFor="password">About</FormLabel>
+              <FormLabel htmlFor="about">About</FormLabel>
               <TextField
                 required
                 fullWidth
@@ -423,9 +436,9 @@ export default function SignUp(props) {
                 id="about"
                 autoComplete="about"
                 variant="outlined"
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                color={passwordError ? 'error' : 'primary'}
+                error={aboutError}
+                helperText={aboutErrorMessage}
+                color={aboutError ? 'error' : 'primary'}
               />
             </FormControl>
            
@@ -455,7 +468,6 @@ export default function SignUp(props) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs2}
               disabled={completing}
               sx={{
                 backgroundColor: '#6B8E23',

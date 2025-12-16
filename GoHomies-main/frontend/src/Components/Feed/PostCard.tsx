@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MapPin, Tag, Calendar, Users } from "lucide-react";
+import { MapPin, Tag, Calendar, Users, Heart, MessageCircle, Share2 } from "lucide-react";
 import timeAgo from "../TimeStamp/timeAgo";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
-import { PostImages } from "../../../ApiCall";
+import { PostImages, LikePost, UnlikePost, CommentOnPost, OptInToPost, OptOutFromPost } from "../../../ApiCall";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { updatePost } from "../../Store/AllPostsSlice";
 
 const PostCard = (props) => {
+  const dispatch = useDispatch();
   const {
     postId,
     user,
@@ -24,37 +27,52 @@ const PostCard = (props) => {
 
   const [optedIn, setOptedIn] = useState(props.initialOptedIn);
   const [optCount, setOptCount] = useState(props.initialOptCount);
+  const [interestedPersons, setInterestedPersons] = useState(props.interestedPersons || []);
+  const [showInterestedModal, setShowInterestedModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const maxOpt = props.totalPersons;
 
   const handleOptToggle = async () => {
-    const postId = props?.postId; // Ensure this is a string, not an object!
-
-    if (!postId || typeof postId !== "string") {
-      console.error("Invalid postId:", postId);
+    if (!postId) {
+      console.error("Invalid postId");
       return;
     }
 
-    const url = `https://gohomiesbackend.onrender.com/post/${
-      optedIn ? "optout" : "optin"
-    }/${postId}`;
-
     try {
-      const response = await fetch(url, {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = optedIn 
+        ? await OptOutFromPost(postId)
+        : await OptInToPost(postId);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response?.status === 200) {
         setOptedIn(!optedIn);
-        if (data && data.interested_persons) {
-          setOptCount(data.interested_persons.length);
+        if (response.data && response.data.interested_persons) {
+          setOptCount(response.data.interested_persons.length);
+          setInterestedPersons(response.data.interested_persons || []);
+          
+          const updatedPost = {
+            ...props,
+            _id: postId,
+            interested_persons: response.data.interested_persons
+          };
+          dispatch(updatePost(updatedPost));
+          
+          if (!optedIn) {
+            setSuccessMessage(`You've successfully joined the trip! 🎉`);
+            setTimeout(() => setSuccessMessage(''), 3000);
+          } else {
+            setSuccessMessage(`You've opted out of the trip.`);
+            setTimeout(() => setSuccessMessage(''), 3000);
+          }
         }
       } else {
-        console.error("Failed to toggle opt status");
+        console.error("Failed to toggle opt status:", response?.data?.msg);
+        setSuccessMessage(response?.data?.msg || "Error updating opt status");
+        setTimeout(() => setSuccessMessage(''), 3000);
       }
     } catch (error) {
       console.error("Error toggling opt status:", error);
+      setSuccessMessage("Error updating opt status");
+      setTimeout(() => setSuccessMessage(''), 3000);
     }
   };
 
@@ -111,37 +129,63 @@ const PostCard = (props) => {
     instanceRef.current?.moveToIdx(idx);
   };
 
-  const [images,setImages]=useState([]);
-  // useEffect(()=>{
-  //     const Postimages = async() => {
-  //       const response = await PostImages(props.destination);
-  //       console.log(response)
-  //       setImages(response.data.results);
-  //     }
-  //     Postimages()
-  //   },[])
-const [liked, setLiked] = useState(false); // you may want to initialize this from props
-const [loading, setLoading] = useState(false);
-const [lCount, setLCount] = useState(props.likeCount); // initialize from props
+  const [images, setImages] = useState([]);
+  const [likeCount, setLikeCount] = useState(props.likeCount || 0);
+  const [isLiked, setIsLiked] = useState(props.likes?.includes(props.user?._id) || false);
+  const [showCommentForm, setShowCommentForm] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [isCommentingLoading, setIsCommentingLoading] = useState(false);
 
-const handleLikeToggle = async () => {
-  console.log("Liking postId:", props?.postId); // check the exact ID
-  try {
-    setLoading(true);
-
-    const url = `https://gohomiesbackend.onrender.com/post/${liked ? "unlike" : "like"}/${props?.postId}`;
-    const response = await axios.post(url, {}, { withCredentials: true });
-
-    if (response.status === 200 && response.data) {
-      setLiked(!liked);
-      setLCount(response.data.likeCount); // ✅ update like count from backend response
+  const handleLikeToggle = async () => {
+    try {
+      if (isLiked) {
+        const response = await UnlikePost(postId);
+        if (response?.status === 200) {
+          setIsLiked(false);
+          setLikeCount(Math.max(0, likeCount - 1));
+        }
+      } else {
+        const response = await LikePost(postId);
+        if (response?.status === 200) {
+          setIsLiked(true);
+          setLikeCount(likeCount + 1);
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
     }
-  } catch (error) {
-    console.error("Error toggling like:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!commentText.trim()) return;
+
+    setIsCommentingLoading(true);
+    try {
+      const response = await CommentOnPost(postId, commentText);
+      if (response?.status === 200) {
+        setCommentText('');
+        setShowCommentForm(false);
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setIsCommentingLoading(false);
+    }
+  };
+
+  const handleShare = () => {
+    const shareText = `Check out this amazing trip: ${destination}`;
+    if (navigator.share) {
+      navigator.share({
+        title: destination,
+        text: shareText,
+      });
+    } else {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+    }
+  };
 
     
   return (
@@ -307,7 +351,7 @@ const handleLikeToggle = async () => {
         <div className="flex justify-between border-t border-b border-[#d7d7d8]">
           <div className="px-6 py-3 flex items-center gap-3">
             <p className="flex gap-2 items-center justify-center">
-              <p className="text-[12px]">{lCount}</p>
+              <p className="text-[12px]">{likeCount}</p>
               <svg
                 width="16"
                 height="16"
@@ -342,84 +386,129 @@ const handleLikeToggle = async () => {
               className={`text-[14px] font-semibold px-4 py-[6px] rounded-[16px] min-h-[36px] transition-all duration-300 ease-in-out cursor-pointer 
       ${
         optedIn
-          ? " text-red-400 border border-red-400"
-          : " text-[#6B8E23] border border-[#6B8E23]"
+          ? "text-green-400 border border-green-400 bg-green-400 bg-opacity-10"
+          : "text-[#6B8E23] border border-[#6B8E23]"
       }`}
             >
-              {optedIn ? "Opt Out" : "Opt In"}
+              {optedIn ? "✓ Already Opted" : "Opt In"}
             </button>
-            <p className="text-[12px] text-gray-600 font-medium">
+            <button
+              onClick={() => setShowInterestedModal(true)}
+              className="text-[12px] text-gray-600 font-medium hover:text-blue-600 transition-colors cursor-pointer"
+            >
               {optCount}/{maxOpt}
-            </p>
+            </button>
           </div>
         </div>
-        <div className="flex justify-center false  max-h-[56px] gap-[8px] items-center p-[8px]">
-          <button className="flex flex-1 gap-[6px] max-w-[192px] xxl:w-[144px] h-[40px] text-center justify-center lg:flex-row flex-col items-center py-[8px] hover:bg-[#d7d7d8] rounded-md "
-          onClick={handleLikeToggle}
-          disabled={loading}
+        <div className="flex justify-center max-h-[56px] gap-[8px] items-center p-[8px]">
+          <button className="flex flex-1 gap-[6px] max-w-[192px] xxl:w-[144px] h-[40px] text-center justify-center lg:flex-row flex-col items-center py-[8px] hover:bg-[#d7d7d8] rounded-md"
+            onClick={handleLikeToggle}
           >
-            <p className="text-[#57585c]">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 25 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M8.89061 8.33071C8.89061 7.93071 9.01061 7.54071 9.23061 7.21071L11.8606 1.77C12.2906 1.12 13.3606 0.660001 14.2706 1C15.2506 1.33 15.9006 2.43 15.6906 3.41C15.6906 3.41 14.64 6.76071 14.6 7.06071C14.56 7.36071 14.64 7.63071 14.81 7.84071C14.98 8.03071 15.23 8.15071 15.5 8.15071H20.2806C21.0706 8.15071 21.7506 8.47071 22.1506 9.03071C22.5306 9.57071 22.6006 10.2707 22.3506 10.9807L20.5 18.4907C20.19 19.7307 18.84 20.7407 17.5 20.7407H12.6C11.93 20.7407 10.99 20.5107 10.56 20.0807L9.27999 19.0907C8.78999 18.7207 8.89061 18.4907 8.89061 18.4907V8.33071Z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M3.68 7.37891C2.13 7.37891 1.5 7.97891 1.5 9.45891V17.5189C1.5 18.9989 2.13 19.5989 3.68 19.5989H5.71C7.26 19.5989 7.89 18.9989 7.89 17.5189V9.45891C7.89 7.97891 7.26 7.37891 5.71 7.37891H3.68Z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </p>
-            <p className="">Like</p>
+            <Heart
+              size={24}
+              className={isLiked ? "fill-red-500 text-red-500" : "text-[#57585c]"}
+            />
+            <p className="">{likeCount}</p>
           </button>
-          <button className="flex flex-1 gap-[6px] max-w-[192px] xxl:w-[144px] h-[40px] text-center justify-center lg:flex-row flex-col items-center py-[8px] hover:bg-[#d7d7d8] rounded-md ">
-            <p className="text-[#57585c]">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 25 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M2.5 12C2.5 6.47715 6.97715 2 12.5 2C18.0228 2 22.5 6.47715 22.5 12C22.5 17.5228 18.0228 22 12.5 22H4.36159C3.22736 22 2.50986 20.7933 3.03406 19.8016L3.88777 17.9647C4.0333 17.6516 4.00372 17.2874 3.83127 16.9883C2.98451 15.5196 2.5 13.8153 2.5 12ZM8.5 14C8.5 13.4477 8.94772 13 9.5 13H15.5C16.0523 13 16.5 13.4477 16.5 14C16.5 14.5523 16.0523 15 15.5 15H9.5C8.94772 15 8.5 14.5523 8.5 14ZM9.5 8.99999C8.94772 8.99999 8.5 9.4477 8.5 9.99999C8.5 10.5523 8.94772 11 9.5 11H11.5C12.0523 11 12.5 10.5523 12.5 9.99999C12.5 9.4477 12.0523 8.99999 11.5 8.99999H9.5Z"
-                  fill=" #57585C"
-                ></path>
-              </svg>
-            </p>
+          <button className="flex flex-1 gap-[6px] max-w-[192px] xxl:w-[144px] h-[40px] text-center justify-center lg:flex-row flex-col items-center py-[8px] hover:bg-[#d7d7d8] rounded-md"
+            onClick={() => setShowCommentForm(!showCommentForm)}
+          >
+            <MessageCircle size={24} className="text-[#57585c]" />
             <p className="">Comment</p>
           </button>
           {/* <button className='flex flex-1 gap-[6px] max-w-[144px] xxl:w-[144px] h-[40px] text-center justify-center lg:flex-row flex-col items-center py-[8px] hover:bg-[#d7d7d8] rounded-md '>
           <p className='text-[#57585c]'><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M7.81498 2C4.17498 2 2.00498 4.17 2.00498 7.81V16.18C2.00498 19.83 4.17498 22 7.81498 22H16.185C19.825 22 21.995 19.83 21.995 16.19V7.81C22.005 4.17 19.835 2 16.195 2H7.81498ZM17.035 16.18L15.345 17.87C15.195 18.02 15.005 18.09 14.815 18.09C14.625 18.09 14.435 18.02 14.285 17.87C13.995 17.58 13.995 17.1 14.285 16.81L14.695 16.4H9.10498C7.80498 16.4 6.75498 15.34 6.75498 14.05V12.28C6.75498 11.87 7.09498 11.53 7.50498 11.53C7.91498 11.53 8.25498 11.87 8.25498 12.28V14.05C8.25498 14.52 8.63498 14.9 9.10498 14.9H14.695L14.285 14.49C13.995 14.2 13.995 13.72 14.285 13.43C14.575 13.14 15.055 13.14 15.345 13.43L17.035 15.12C17.105 15.19 17.155 15.27 17.195 15.36C17.275 15.55 17.275 15.76 17.195 15.94C17.155 16.03 17.105 16.11 17.035 16.18ZM16.505 12.4698C16.095 12.4698 15.755 12.1298 15.755 11.7198V9.94984C15.755 9.47984 15.375 9.09984 14.905 9.09984H9.31498L9.72498 9.49984C10.015 9.78984 10.015 10.2698 9.72498 10.5598C9.57498 10.7098 9.38498 10.7798 9.19498 10.7798C9.00498 10.7798 8.81498 10.7098 8.66498 10.5598L6.97498 8.86984C6.90498 8.79984 6.85498 8.71984 6.81498 8.62984C6.73498 8.44984 6.73498 8.23984 6.81498 8.05984C6.85498 7.96984 6.90498 7.87984 6.97498 7.80984L8.66498 6.11984C8.95498 5.82984 9.43498 5.82984 9.72498 6.11984C10.015 6.40984 10.015 6.88984 9.72498 7.17984L9.31498 7.58984H14.905C16.205 7.58984 17.255 8.64984 17.255 9.93984V11.7198C17.255 12.1298 16.915 12.4698 16.505 12.4698Z" fill=" #57585C"></path></svg></p>
           <p className=''>Repost</p>
         </button> */}
-          <button className="flex flex-1 gap-[6px] max-w-[192px] xxl:w-[144px] h-[40px] text-center justify-center lg:flex-row flex-col items-center py-[8px] hover:bg-[#d7d7d8] rounded-md ">
-            <p className="text-[#57585c]">
-              <svg
-                width="25"
-                height="24"
-                viewBox="0 0 25 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M21.9354 2.58198C21.4352 2.0686 20.6949 1.87734 20.0046 2.07866L3.908 6.75952C3.1797 6.96186 2.66349 7.54269 2.52443 8.28055C2.38237 9.0315 2.87858 9.98479 3.52684 10.3834L8.5599 13.4768C9.07611 13.7939 9.74238 13.7144 10.1696 13.2835L15.9329 7.4843C16.223 7.18231 16.7032 7.18231 16.9934 7.4843C17.2835 7.77623 17.2835 8.24935 16.9934 8.55134L11.22 14.3516C10.7918 14.7814 10.7118 15.4508 11.0269 15.9702L14.1022 21.0538C14.4623 21.6577 15.0826 22 15.7628 22C15.8429 22 15.9329 22 16.013 21.9899C16.7933 21.8893 17.4135 21.3558 17.6436 20.6008L22.4156 4.52479C22.6257 3.84028 22.4356 3.09537 21.9354 2.58198Z"
-                  fill=" #57585C"
-                ></path>
-              </svg>
-            </p>
+          <button className="flex flex-1 gap-[6px] max-w-[192px] xxl:w-[144px] h-[40px] text-center justify-center lg:flex-row flex-col items-center py-[8px] hover:bg-[#d7d7d8] rounded-md"
+            onClick={handleShare}
+          >
+            <Share2 size={24} className="text-[#57585c]" />
             <p className="">Share</p>
           </button>
         </div>
+        {showCommentForm && (
+          <div className="px-6 py-4 border-t border-[#d7d7d8] flex gap-2">
+            <input
+              type="text"
+              placeholder="Add a comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleCommentSubmit();
+                }
+              }}
+              className="flex-1 px-3 py-2 border border-[#d7d7d8] rounded-lg focus:outline-none focus:border-blue-500"
+            />
+            <button
+              onClick={handleCommentSubmit}
+              disabled={isCommentingLoading}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+            >
+              {isCommentingLoading ? 'Posting...' : 'Post'}
+            </button>
+          </div>
+        )}
+        
+        {successMessage && (
+          <div className="px-6 py-3 bg-green-100 border border-green-300 rounded-lg text-green-700 font-medium animate-pulse">
+            {successMessage}
+          </div>
+        )}
       </div>
+
+      {showInterestedModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-96 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold text-gray-900">
+                People Interested ({optCount})
+              </h3>
+              <button
+                onClick={() => setShowInterestedModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {interestedPersons && interestedPersons.length > 0 ? (
+                interestedPersons.map((person, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                      {person.name ? person.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">
+                        {person.name || 'Anonymous'}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        @{person.username || 'user'}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4">
+                  No one has opted in yet
+                </p>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowInterestedModal(false)}
+              className="w-full mt-4 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

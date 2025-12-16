@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001';
+
 const api = axios.create({
-    baseURL:"http://localhost:8001/"
+    baseURL: `${API_BASE_URL}/`
 })
 
 export const UserSignIn = async(email,password)=>{
@@ -121,6 +123,127 @@ export const FetchVlogs = async() => {
             withCredentials: true 
         })
 
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const LikePost = async(postId) => {
+    try {
+        const response = await api.post(`post/like/${postId}`, {}, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const UnlikePost = async(postId) => {
+    try {
+        const response = await api.post(`post/unlike/${postId}`, {}, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const CommentOnPost = async(postId, comment) => {
+    try {
+        const response = await api.post(`post/comment/${postId}`, { comment }, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const LikeVlog = async(vlogId) => {
+    try {
+        const response = await api.post(`vlog/like/${vlogId}`, {}, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const UnlikeVlog = async(vlogId) => {
+    try {
+        const response = await api.post(`vlog/unlike/${vlogId}`, {}, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const CommentOnVlog = async(vlogId, comment) => {
+    try {
+        const response = await api.post(`vlog/comment/${vlogId}`, { comment }, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const OptInToPost = async(postId) => {
+    try {
+        const response = await api.get(`post/optin/${postId}`, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const OptOutFromPost = async(postId) => {
+    try {
+        const response = await api.get(`post/optout/${postId}`, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const TripPlanningChat = async(message) => {
+    try {
+        const response = await api.post('ai/trip-planning', { message }, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const OptimizeBudget = async(budget) => {
+    try {
+        const response = await api.post('ai/optimize-budget', { budget }, {
+            withCredentials: true
+        })
+        return response
+    } catch (error) {
+        return error.response
+    }
+}
+
+export const GetTravelInsights = async() => {
+    try {
+        const response = await api.get('ai/travel-insights', {
+            withCredentials: true
+        })
         return response
     } catch (error) {
         return error.response

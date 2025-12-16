@@ -144,7 +144,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500 border-t border-gray-200 pt-8">
           <p>© 2024 GoHomies. All rights reserved.</p>
-          <p className="mt-4 sm:mt-0">Made with ❤️ by Priyanshu, Ashutosh & Ashish</p>
+          <p className="mt-4 sm:mt-0">Made with ❤️ by Shubham</p>
         </div>
 
       </div>

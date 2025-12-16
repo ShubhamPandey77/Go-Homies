@@ -21,8 +21,8 @@ const loadStateFromLocalStorage = () => {
     }
   };
   
-  // Initialize the state from localStorage if available
   const initialState = loadStateFromLocalStorage() || {
+    _id: '',
     name: '',
     email: '',
     username: '',

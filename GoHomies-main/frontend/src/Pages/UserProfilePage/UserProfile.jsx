@@ -6,6 +6,7 @@ import ProfilePhoto from "./../../assets/3.jpg";
 import Posts from "./../../Components/UserProfile/UserPost";
 import About from "./../../Components/UserProfile/UserAbout";
 import Settings from "./../../Components/UserProfile/UserSetting";
+import Trips from "./../../Components/UserProfile/UserTrips";
 
 const UserProfile = () => {
   const [activeSection, setActiveSection] = useState("Posts");
@@ -16,6 +17,8 @@ const UserProfile = () => {
         return <Posts />;
       case "About":
         return <About />;
+      case "Trips":
+        return <Trips />;
       case "Settings":
         return <Settings />;
       default:
@@ -50,7 +53,7 @@ const UserProfile = () => {
 
       {/* Navigation Buttons */}
       <div className="flex justify-center mt-10 space-x-10 border-t border-gray-700 pt-6">
-        {["Posts", "About", "Settings"].map((section) => (
+        {["Posts", "Trips", "About", "Settings"].map((section) => (
           <button
             key={section}
             onClick={() => setActiveSection(section)}

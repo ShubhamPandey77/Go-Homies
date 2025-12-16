@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useScreenResizeValue } from "../../ScreenSizeFunction";
+import { Star, MapPin, Users, DollarSign } from "lucide-react";
 
 import Image1 from "../../assets/1.jpg";
 import Image2 from "../../assets/2.jpg";
@@ -8,8 +9,9 @@ import Image3 from "../../assets/3.jpg";
 const TopPackages = () => {
   const breakpoint = useScreenResizeValue();
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // PRELOAD ALL IMAGES
   const preloadImages = (images) => {
     const loaders = images.map(
       (src) =>
@@ -30,31 +32,63 @@ const TopPackages = () => {
       .catch((err) => console.error("Image failed to load", err));
   }, []);
 
-  const TopPackagesArray = [
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await fetch('http://localhost:8001/package/fetch?sort=rating');
+        if (response.ok) {
+          const data = await response.json();
+          setPackages(data.slice(0, 6));
+        }
+      } catch (error) {
+        console.log("Using default packages due to:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
+
+  const TopPackagesArray = packages.length > 0 ? packages.map((pkg, i) => ({
+    id: pkg._id,
+    image: pkg.coverImage || [Image1, Image2, Image3][i % 3],
+    name: pkg.name,
+    design: `${pkg.duration}${pkg.durationUnit === 'days' ? 'D' : 'W'} • ₹${pkg.basePrice}`,
+    location: pkg.destination,
+    rating: pkg.rating || 4.5,
+    difficulty: pkg.difficulty,
+  })) : [
     {
       image: Image1,
       name: "Kerala Paradise",
-      Desgn: "5D/4N • ₹25,000",
+      design: "5D/4N • ₹25,000",
       location: "Kerala",
+      rating: 4.8,
+      difficulty: "Easy",
     },
     {
       image: Image2,
       name: "Himalayan Adventure",
-      Desgn: "7D/6N • ₹35,000",
+      design: "7D/6N • ₹35,000",
       location: "Manali",
+      rating: 4.6,
+      difficulty: "Moderate",
     },
     {
       image: Image3,
       name: "Mountain Escape",
-      Desgn: "4D/3N • ₹20,000",
+      design: "4D/3N • ₹20,000",
       location: "Himachal",
+      rating: 4.7,
+      difficulty: "Moderate",
     },
   ];
 
-  if (!imagesLoaded) return null;
+  if (!imagesLoaded && !loading) return null;
 
   return (
-    <div className="flex items-center justify-center overflow-hidden w-full py-[3rem] px-4 bg-gradient-to-b from-white to-[#f5f5f5]">
+    <div className="flex items-center justify-center overflow-hidden w-full py-[3rem] px-4 bg-gradient-to-b from-white via-[#fafafa] to-[#f5f5f5]">
       <div
         className={`${
           breakpoint <= 1440 ? "w-[96%]" : "w-[1392px]"
@@ -75,97 +109,69 @@ const TopPackages = () => {
           </p>
         </div>
 
-        {/* ------------ PACKAGES LIST ------------ */}
-        <div className="w-full overflow-x-auto md:overflow-visible">
-          <ul className="flex items-center justify-center gap-[1.2rem] h-[280px] md:h-[420px] select-none min-w-max md:min-w-0">
-            {TopPackagesArray.map((packages, index) => (
-              <li
-                key={index}
-                className="
-                  w-[90px] 
-                  group 
-                  hover:w-[300px] 
-                  bg-[rgba(0,0,0,0.5)] 
-                  h-full 
-                  relative 
-                  rounded-[40px] 
-                  overflow-hidden 
-                  transition-all 
-                  duration-500 
-                  ease-in-out
-                  cursor-pointer
-                  shadow-lg
-                  hover:shadow-2xl
-                "
-              >
-                {/* Dark overlay */}
-                <div
-                  className="
-                    absolute inset-0 
-                    bg-[rgba(0,0,0,0.55)] 
-                    group-hover:bg-[rgba(0,0,0,0.2)]
-                    z-10 
-                    transition-all 
-                    duration-500
-                    pointer-events-none
-                  "
-                />
-
-                {/* Image */}
+        {/* ------------ PACKAGES GRID ------------ */}
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {TopPackagesArray.map((pkg, index) => (
+            <div
+              key={index}
+              className="
+                group relative rounded-2xl overflow-hidden shadow-lg 
+                hover:shadow-2xl transition-all duration-500 cursor-pointer
+                bg-white hover:scale-105
+              "
+            >
+              {/* Image Container */}
+              <div className="relative h-48 overflow-hidden bg-gray-200">
                 <img
-                  src={packages.image}
-                  className="object-cover h-full w-full"
+                  src={pkg.image}
+                  alt={pkg.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   loading="lazy"
-                  alt={packages.name}
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                
+                {/* Difficulty Badge */}
+                <div className="absolute top-4 right-4">
+                  <span className="px-3 py-1 bg-[#6B8E23] text-white text-xs font-semibold rounded-full">
+                    {pkg.difficulty}
+                  </span>
+                </div>
+              </div>
 
-                {/* Vertical text (collapsed state) */}
-                <span
-                  className="
-                    absolute 
-                    z-20 
-                    top-1/2 
-                    left-1/2 
-                    -translate-x-1/2 
-                    -translate-y-1/2
-                    group-hover:-top-[50%]
-                    rotate-[-90deg]
-                    transition-all 
-                    duration-300
-                    text-white
-                  "
-                >
-                  <h2 className="text-[1rem] whitespace-nowrap font-semibold">
-                    {packages.name}
-                  </h2>
-                </span>
+              {/* Content */}
+              <div className="p-5">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#6B8E23] transition">
+                  {pkg.name}
+                </h3>
+                
+                {/* Location */}
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-3">
+                  <MapPin size={16} className="text-[#6B8E23]" />
+                  <span>{pkg.location}</span>
+                </div>
 
-                {/* Expanded info (hover state) */}
-                <span
-                  className="
-                    absolute 
-                    z-20 
-                    top-[70%]
-                    left-[-150%]
-                    group-hover:left-[15%]
-                    transition-all 
-                    duration-500
-                    text-white
-                  "
-                >
-                  <h2 className="whitespace-nowrap text-[1.4rem] font-bold leading-tight">
-                    {packages.name}
-                  </h2>
-                  <p className="whitespace-nowrap text-[0.95rem] mt-2 font-medium">
-                    {packages.Desgn}
-                  </p>
-                  <p className="whitespace-nowrap text-[0.85rem] mt-2 opacity-95 flex items-center gap-1">
-                    📍 {packages.location}
-                  </p>
-                </span>
-              </li>
-            ))}
-          </ul>
+                {/* Rating */}
+                <div className="flex items-center gap-1 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      className={i < Math.floor(pkg.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                    />
+                  ))}
+                  <span className="ml-1 text-xs text-gray-500">({pkg.rating})</span>
+                </div>
+
+                {/* Price & Duration */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <span className="text-[#6B8E23] font-bold text-sm">{pkg.design}</span>
+                  <button className="px-3 py-1.5 bg-[#6B8E23] text-white text-xs rounded-lg hover:bg-[#5a7a1c] transition">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

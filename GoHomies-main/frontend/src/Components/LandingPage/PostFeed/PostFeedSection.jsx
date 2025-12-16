@@ -19,14 +19,8 @@ const PostFeedSection = () => {
   }, []);
 
   return (
-    <div className="flex relative items-center justify-center w-full h-full">
-      <div className="bg-[#FAFAFA] w-full h-full absolute top-0"></div>
-
-      <div
-        className={`${
-          breakpoint <= 1440 ? "w-[96%]" : "w-[1392px]"
-        } flex flex-col items-center gap-8 py-16 px-4`}
-      >
+    <div className="flex relative items-center justify-center w-full min-h-screen bg-[#FAFAFA]">
+      <div className="w-full flex flex-col items-center gap-8 py-16 px-4">
         {/* Header Section */}
         <div className="flex flex-col items-center text-black">
           <span className="px-8 py-1 rounded-full bg-[#6B8E23] text-white text-sm md:text-base">
@@ -43,20 +37,13 @@ const PostFeedSection = () => {
         </div>
 
         {/* Feed Section */}
-        <div className="relative top-[40px] md:top-[80px] w-full h-auto md:h-[100vh]">
-          <div
-            ref={containerRef}
-            className="sticky top-[40px] md:top-[80px] h-auto md:h-[calc(100vh-82px)] flex flex-col md:flex-row items-start justify-between w-full gap-4"
-          >
-            
+        <div className="w-full flex flex-col md:flex-row items-start justify-between gap-4">
+          <PostFeedCenter
+            className="z-20 w-full lg:flex-1"
+          />
 
-            <PostFeedCenter
-              className={`${isStuck ? "overflow-hidden" : "overflow-auto"} z-20 w-full lg:flex-1`}
-            />
-
-            <div className="hidden lg:flex w-full lg:w-auto">
-              <PostFeedRight />
-            </div>
+          <div className="hidden lg:flex w-full lg:w-auto">
+            <PostFeedRight />
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 
-import { Header, PostCreationSection, PostFeedSection, TopPackages } from '../Components'
-
+import { Header, PostFeedSection, TopPackages } from '../Components'
+import { BudgetOptimizer, TravelInsights } from '../Components/AI'
 import Footer from '../Components/Footer/Footer'
 
 
@@ -15,7 +15,10 @@ const LandingPage = () => {
       
         <Header/>
         <TopPackages/>
-        <PostCreationSection/>
+        <div className='px-4 md:px-8 lg:px-16 py-8 max-w-7xl mx-auto w-full space-y-8'>
+          <BudgetOptimizer/>
+          <TravelInsights/>
+        </div>
         <PostFeedSection/>  
         <Footer/>
     </div>

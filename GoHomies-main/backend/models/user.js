@@ -20,14 +20,76 @@ const userSchema = new mongoose.Schema({
       unique:true
      },
      title:{
-      type:String
+      type:String,
+      default:null
      },
      designation:{
-      type:String
+      type:String,
+      default:null
      },
      about:{
-      type:String
-     }
+      type:String,
+      default:null
+     },
+     profileImage:{
+      type:String,
+      default:null
+     },
+     coverImage:{
+      type:String,
+      default:null
+     },
+     phone:{
+      type:String,
+      default:null
+     },
+     location:{
+      type:String,
+      default:null
+     },
+     bio:{
+      type:String,
+      default:null
+     },
+     interests:[String],
+     badges:[String],
+     socialLinks:{
+      instagram:String,
+      facebook:String,
+      twitter:String,
+      linkedin:String
+     },
+     travelExperience:{
+      type:Number,
+      default:0
+     },
+     tripsTaken:{
+      type:Number,
+      default:0
+     },
+     postsCreated:{
+      type:Number,
+      default:0
+     },
+     followers:[{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"users"
+     }],
+     following:[{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"users"
+     }],
+     savedPackages:[{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"packages"
+     }],
+     isVerified:{
+      type:Boolean,
+      default:false
+     },
+     verificationToken:String,
+     resetToken:String,
+     resetTokenExpiry:Date
 },{timestamps:true})
 
 const User = mongoose.model('users',userSchema);

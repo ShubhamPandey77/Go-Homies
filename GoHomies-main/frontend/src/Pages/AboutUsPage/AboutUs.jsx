@@ -1,7 +1,7 @@
 import React from 'react'
 import AboutUsHeader from '../../Components/AboutUs/AboutUsHeader'
 import AboutUsDetails from '../../Components/AboutUs/AboutUsDetails'
-import AboutUsMembers from '../../Components/AboutUs/AboutUsMembers'
+import TravelAgencySection from '../../Components/AboutUs/TravelAgencySection'
 import Footer from '../../Components/Footer/Footer'
 
 const AboutUs = () => {
@@ -9,7 +9,7 @@ const AboutUs = () => {
     <div className="flex  flex-col">
       <AboutUsHeader/>
       <AboutUsDetails/>
-      <AboutUsMembers/>
+      <TravelAgencySection/>
       <Footer/>
     </div>
   )

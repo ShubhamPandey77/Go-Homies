@@ -95,7 +95,7 @@ export default function SignIn(props) {
 
   const handleSubmit = async(event) => {
     event.preventDefault();
-    if (emailError || passwordError) {
+    if (!validateInputs()) {
       return;
     }
     const data = new FormData(event.currentTarget);
@@ -111,6 +111,7 @@ export default function SignIn(props) {
         if (response.data.msg === 'Logged In' && response.status === 200) {
           const user = response.data.user
           dispatch(setUserData({
+            _id: user?._id,
             name: user?.name,
             email: user?.email,
             about: user?.about,
@@ -242,7 +243,6 @@ export default function SignIn(props) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
               disabled={signingIn}
               sx={{
                 backgroundColor: '#6B8E23',
