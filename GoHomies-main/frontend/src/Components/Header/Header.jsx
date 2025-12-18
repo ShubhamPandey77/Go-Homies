@@ -175,8 +175,8 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="p-4 md:p-8 pt-[100px] h-auto md:h-[calc(95vh-60px)] min-h-[400px]">
-      <div className="relative rounded-3xl overflow-hidden h-[300px] md:h-[calc(85vh-160px)]">
+    <div className="p-4 md:p-8 pt-[140px] md:pt-[120px] h-auto md:h-[calc(95vh-60px)] min-h-[500px]">
+      <div className="relative rounded-3xl overflow-hidden h-[350px] md:h-[calc(85vh-160px)] shadow-2xl">
 
         <div className="relative overflow-hidden bg-black h-full">
           {/* Black overlay */}
@@ -193,13 +193,13 @@ const Header = () => {
                 className="min-w-full h-full bg-cover bg-center flex items-start justify-start"
                 style={{ backgroundImage: `url(${item.src})` }}
               >
-                <div className="p-4 md:p-6 rounded-xl flex flex-col items-start gap-2 z-10 text-white max-w-xs md:max-w-xl text-left m-4 md:m-10">
-                  <p className="text-[14px] md:text-[18px] text-[#f555a7]">
-                    #{index + 1} Spotlight
+                <div className="p-4 md:p-8 rounded-2xl flex flex-col items-start gap-3 z-10 text-white max-w-xs md:max-w-2xl text-left m-4 md:m-8 bg-gradient-to-r from-black/40 via-black/20 to-transparent backdrop-blur-md border border-white/20 shadow-xl">
+                  <p className="text-[12px] md:text-[16px] text-[#f555a7] font-semibold uppercase tracking-wider">
+                    ✨ #{index + 1} Spotlight
                   </p>
-                  <h1 className="text-2xl md:text-5xl font-bold mb-2 md:mb-4">{item.title}</h1>
-                  <p className="mb-4 md:mb-6 text-[13px] md:text-[16px] line-clamp-2 md:line-clamp-none">{item.desc}</p>
-                  <button className="bg-pink-500 hover:bg-pink-600 px-4 md:px-6 py-2 rounded-full text-white transition text-sm md:text-base">
+                  <h1 className="text-3xl md:text-6xl font-bold mb-1 md:mb-2 bg-gradient-to-r from-white via-gray-100 to-gray-200 bg-clip-text text-transparent">{item.title}</h1>
+                  <p className="mb-4 md:mb-6 text-[13px] md:text-[16px] line-clamp-2 md:line-clamp-3 text-gray-100 leading-relaxed">{item.desc}</p>
+                  <button className="bg-gradient-to-r from-[#f555a7] to-[#ff1493] hover:from-[#f555a7] hover:to-[#ff69b4] px-6 md:px-8 py-3 rounded-full text-white transition-all duration-300 text-sm md:text-base font-semibold shadow-lg hover:shadow-xl hover:shadow-[#f555a7]/50 hover:scale-105 active:scale-95">
                     Explore Packages
                   </button>
                 </div>
@@ -208,16 +208,18 @@ const Header = () => {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex flex-col absolute bottom-8 right-8 gap-2 z-20">
+          <div className="flex flex-col absolute bottom-6 md:bottom-8 right-6 md:right-8 gap-2 z-20">
             <button
-              className="bg-black/70 rounded-md p-2 cursor-pointer hover:bg-black/90 transition"
+              className="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-md rounded-full p-3 cursor-pointer hover:from-white/30 hover:to-white/20 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 border border-white/20 hover:border-white/40"
               onClick={handlePrev}
+              aria-label="Previous slide"
             >
               <ChevronLeft color="white" size={24} />
             </button>
             <button
-              className="bg-black/70 rounded-md p-2 cursor-pointer hover:bg-black/90 transition"
+              className="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-md rounded-full p-3 cursor-pointer hover:from-white/30 hover:to-white/20 hover:shadow-lg hover:shadow-white/20 transition-all duration-300 border border-white/20 hover:border-white/40"
               onClick={handleNext}
+              aria-label="Next slide"
             >
               <ChevronRight color="white" size={24} />
             </button>
@@ -230,90 +232,92 @@ const Header = () => {
       {/* Bottom White Glass Box */}
       <div
         className="
-          w-[95%] md:w-[700px] h-auto md:h-auto
-          absolute top-[70%] md:top-[68%] left-1/2 -translate-x-1/2
-          rounded-3xl bg-white/40 backdrop-blur-3xl
-          flex flex-col md:flex-row items-stretch justify-between p-6 md:p-8
+          w-[95%] md:w-[800px] h-auto md:h-auto
+          absolute top-[72%] md:top-[70%] left-1/2 -translate-x-1/2
+          rounded-2xl md:rounded-3xl bg-gradient-to-br from-white/30 via-white/20 to-white/10 backdrop-blur-2xl
+          flex flex-col md:flex-row items-stretch justify-between p-5 md:p-8
           font-medium text-black text-sm md:text-base
-          drop-shadow-[2px_4px_15px_rgba(0,0,0,0.2)]
-          border border-white/60
+          shadow-2xl
+          border border-white/50 hover:border-white/70
           gap-0
           overflow-hidden
+          transition-all duration-300
+          hover:shadow-3xl hover:from-white/40 hover:via-white/30 hover:to-white/20
         "
       >
         {/* Location Section */}
-        <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-0 hover:bg-white/20 transition cursor-pointer rounded-lg px-2"
+        <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-0 hover:bg-white/20 transition-all duration-300 cursor-pointer rounded-lg px-2 group"
              onClick={() => setShowLocationSelector(!showLocationSelector)}>
           <div className="flex items-center gap-2 mb-2">
-            <MapPin size={20} className="text-[#6B8E23]" />
-            <span className="text-xs md:text-sm font-semibold text-gray-700 uppercase">Location</span>
+            <MapPin size={20} className="text-[#6B8E23] group-hover:scale-110 transition-transform" />
+            <span className="text-xs md:text-sm font-semibold text-gray-600 uppercase tracking-wide">Location</span>
           </div>
-          <h1 className="text-lg md:text-2xl font-bold text-gray-900">{selectedLocation}</h1>
+          <h1 className="text-lg md:text-2xl font-bold text-gray-900 group-hover:text-[#6B8E23] transition-colors">{selectedLocation}</h1>
         </div>
 
         {/* Divider */}
-        <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-[#d7d7d8] to-transparent"></div>
-        <div className="md:hidden h-px w-full bg-gradient-to-r from-transparent via-[#d7d7d8] to-transparent"></div>
+        <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+        <div className="md:hidden h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
 
         {/* Best Travel Month Section */}
-        <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-0 hover:bg-white/20 transition cursor-pointer rounded-lg px-2">
+        <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-0 hover:bg-white/20 transition-all duration-300 cursor-pointer rounded-lg px-2 group">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar size={20} className="text-[#6B8E23]" />
-            <span className="text-xs md:text-sm font-semibold text-gray-700 uppercase">Best Season</span>
+            <Calendar size={20} className="text-[#6B8E23] group-hover:scale-110 transition-transform" />
+            <span className="text-xs md:text-sm font-semibold text-gray-600 uppercase tracking-wide">Best Season</span>
           </div>
-          <h2 className="text-lg md:text-2xl font-bold text-gray-900">{locationData[selectedLocation]?.bestMonth || "N/A"}</h2>
+          <h2 className="text-lg md:text-2xl font-bold text-gray-900 group-hover:text-[#6B8E23] transition-colors">{locationData[selectedLocation]?.bestMonth || "N/A"}</h2>
         </div>
 
         {/* Divider */}
-        <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-[#d7d7d8] to-transparent"></div>
-        <div className="md:hidden h-px w-full bg-gradient-to-r from-transparent via-[#d7d7d8] to-transparent"></div>
+        <div className="hidden md:block w-px h-16 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+        <div className="md:hidden h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
 
         {/* Best Travel Partner Section */}
-        <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-0 hover:bg-white/20 transition cursor-pointer rounded-lg px-2">
+        <div className="flex-1 flex flex-col items-center justify-center py-4 md:py-0 hover:bg-white/20 transition-all duration-300 cursor-pointer rounded-lg px-2 group">
           <div className="flex items-center gap-2 mb-2">
-            <Users size={20} className="text-[#6B8E23]" />
-            <span className="text-xs md:text-sm font-semibold text-gray-700 uppercase">Travel Buddy Type</span>
+            <Users size={20} className="text-[#6B8E23] group-hover:scale-110 transition-transform" />
+            <span className="text-xs md:text-sm font-semibold text-gray-600 uppercase tracking-wide">Travel Buddy Type</span>
           </div>
-          <h2 className="text-lg md:text-2xl font-bold text-gray-900 text-center">{locationData[selectedLocation]?.bestPartner || "N/A"}</h2>
+          <h2 className="text-lg md:text-2xl font-bold text-gray-900 text-center group-hover:text-[#6B8E23] transition-colors">{locationData[selectedLocation]?.bestPartner || "N/A"}</h2>
         </div>
       </div>
 
       {/* Location Selector Modal */}
       {showLocationSelector && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-[95%] md:w-full max-h-[70vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto border border-white/40">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
-              <h2 className="text-2xl font-bold text-gray-900">Select a Location</h2>
+            <div className="flex items-center justify-between p-6 md:p-8 border-b border-gray-200 sticky top-0 bg-gradient-to-r from-white to-gray-50">
+              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#6B8E23] to-[#5a7a1c] bg-clip-text text-transparent">Select a Location</h2>
               <button
                 onClick={() => setShowLocationSelector(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                className="p-2 hover:bg-gray-200 rounded-full transition-all duration-300 group"
               >
-                <X size={24} className="text-gray-600" />
+                <X size={24} className="text-gray-600 group-hover:text-gray-900 group-hover:scale-110 transition-all" />
               </button>
             </div>
 
             {/* Location Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 md:p-8">
               {images.map((location) => (
                 <div
                   key={location.title}
                   onClick={() => handleLocationSelect(location.title)}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                  className={`p-4 md:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 group ${
                     selectedLocation === location.title
-                      ? "border-[#6B8E23] bg-[#6B8E23]/10"
-                      : "border-gray-200 hover:border-[#6B8E23] bg-white"
+                      ? "border-[#6B8E23] bg-gradient-to-br from-[#6B8E23]/15 to-[#6B8E23]/5 shadow-lg shadow-[#6B8E23]/20"
+                      : "border-gray-200 hover:border-[#6B8E23] bg-white hover:shadow-lg hover:shadow-[#6B8E23]/10"
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <MapPin size={20} className="text-[#6B8E23] flex-shrink-0 mt-1" />
+                    <MapPin size={20} className="text-[#6B8E23] flex-shrink-0 mt-1 group-hover:scale-110 transition-transform" />
                     <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-lg">{location.title}</h3>
+                      <h3 className="font-bold text-gray-900 text-lg group-hover:text-[#6B8E23] transition-colors">{location.title}</h3>
                       <p className="text-sm text-gray-600 mt-1">{location.desc}</p>
                       {locationData[location.title] && (
-                        <div className="mt-2 pt-2 border-t border-gray-200">
-                          <p className="text-xs text-gray-500">
-                            <span className="font-semibold">Best Season:</span> {locationData[location.title].bestMonth}
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs text-gray-600">
+                            <span className="font-semibold text-gray-900">🗓️ Best Season:</span> {locationData[location.title].bestMonth}
                           </p>
                         </div>
                       )}

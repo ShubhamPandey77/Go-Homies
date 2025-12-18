@@ -30,7 +30,9 @@ const PostCard = (props) => {
   const [interestedPersons, setInterestedPersons] = useState(props.interestedPersons || []);
   const [showInterestedModal, setShowInterestedModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isOptLoading, setIsOptLoading] = useState(false);
   const maxOpt = props.totalPersons;
+  const isFull = optCount >= maxOpt;
 
   const handleOptToggle = async () => {
     if (!postId) {
@@ -38,6 +40,13 @@ const PostCard = (props) => {
       return;
     }
 
+    if (isFull && !optedIn) {
+      setSuccessMessage("This trip is full! Try opting in to a different trip.");
+      setTimeout(() => setSuccessMessage(''), 3000);
+      return;
+    }
+
+    setIsOptLoading(true);
     try {
       const response = optedIn 
         ? await OptOutFromPost(postId)
@@ -73,6 +82,8 @@ const PostCard = (props) => {
       console.error("Error toggling opt status:", error);
       setSuccessMessage("Error updating opt status");
       setTimeout(() => setSuccessMessage(''), 3000);
+    } finally {
+      setIsOptLoading(false);
     }
   };
 
@@ -380,23 +391,55 @@ const PostCard = (props) => {
             <p>Comments</p>
           </div>
 
-          <div className="px-6 py-2 flex items-center gap-3">
+          <div className="px-6 py-2 flex items-center gap-2 flex-wrap">
             <button
               onClick={handleOptToggle}
-              className={`text-[14px] font-semibold px-4 py-[6px] rounded-[16px] min-h-[36px] transition-all duration-300 ease-in-out cursor-pointer 
+              disabled={isOptLoading || (isFull && !optedIn)}
+              className={`text-[14px] font-semibold px-4 py-[8px] rounded-[20px] min-h-[40px] transition-all duration-300 ease-in-out cursor-pointer flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed
       ${
         optedIn
-          ? "text-green-400 border border-green-400 bg-green-400 bg-opacity-10"
-          : "text-[#6B8E23] border border-[#6B8E23]"
+          ? "text-white bg-gradient-to-r from-green-500 to-emerald-600 border border-green-600 shadow-md hover:shadow-lg hover:scale-105"
+          : isFull
+          ? "text-white bg-gray-400 border border-gray-400 cursor-not-allowed"
+          : "text-white bg-gradient-to-r from-blue-500 to-blue-600 border border-blue-700 shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
       }`}
             >
-              {optedIn ? "✓ Already Opted" : "Opt In"}
+              {isOptLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : optedIn ? (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Joined
+                </>
+              ) : isFull ? (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 2.476c.44.063.884.147 1.378.29a5 5 0 014 4.004c.231.558.512 1.1.842 1.615a6 6 0 016.18 6.18c.516.33 1.058.611 1.615.842a5 5 0 014.004 4z" clipRule="evenodd" />
+                  </svg>
+                  Full
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Join Trip
+                </>
+              )}
             </button>
             <button
               onClick={() => setShowInterestedModal(true)}
-              className="text-[12px] text-gray-600 font-medium hover:text-blue-600 transition-colors cursor-pointer"
+              className="text-[12px] text-gray-700 font-semibold hover:text-blue-600 transition-colors cursor-pointer bg-gray-100 hover:bg-blue-50 px-3 py-[8px] rounded-[16px] min-h-[40px] flex items-center"
             >
-              {optCount}/{maxOpt}
+              👥 {optCount}/{maxOpt}
             </button>
           </div>
         </div>
@@ -452,7 +495,10 @@ const PostCard = (props) => {
         )}
         
         {successMessage && (
-          <div className="px-6 py-3 bg-green-100 border border-green-300 rounded-lg text-green-700 font-medium animate-pulse">
+          <div className="px-6 py-3 mx-6 mb-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg text-green-800 font-medium flex items-center gap-2 shadow-sm animate-in fade-in slide-in-from-top duration-300">
+            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
             {successMessage}
           </div>
         )}
